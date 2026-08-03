@@ -14,7 +14,7 @@ export default function DashboardPage() {
       const authenticated = await checkPasskeyAuth()
       if (!authenticated) {
         // Force redirect back to /login route so /dashboard never renders the login card
-        router.replace('/login')
+        window.location.href = '/login'
       } else {
         setIsAuthorized(true)
       }
