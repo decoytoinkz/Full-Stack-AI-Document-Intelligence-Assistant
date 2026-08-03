@@ -1,58 +1,37 @@
 'use client'
 
-import { useState, Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useActionState, Suspense } from 'react'
 import { KeyRound, ArrowRight, AlertCircle, Loader2 } from 'lucide-react'
 import { verifyPasskey } from './actions'
 
 function LoginForm() {
-  const searchParams = useSearchParams()
-  const [passkey, setPasskey] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [errorMsg, setErrorMsg] = useState(searchParams.get('error') || '')
-
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    setLoading(true)
-    setErrorMsg('')
-
-    const formData = new FormData(e.currentTarget)
-    const result = await verifyPasskey(formData)
-
-    if (result.success) {
-      window.location.href = '/dashboard'
-    } else {
-      setErrorMsg(result.error || 'Invalid passkey')
-      setLoading(false)
-    }
-  }
+  const [state, formAction, isPending] = useActionState(verifyPasskey, null)
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form action={formAction} className="space-y-4">
       <div>
         <input
           type="password"
           name="passkey"
-          value={passkey}
-          onChange={(e) => setPasskey(e.target.value)}
           placeholder="Enter Secret Passkey..."
+          required
           className="w-full rounded-lg border border-slate-800 bg-slate-950 px-4 py-2.5 text-sm font-mono text-slate-100 placeholder-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
         />
       </div>
 
-      {errorMsg && (
+      {state?.error && (
         <div className="flex items-center gap-2 rounded-lg border border-rose-900/50 bg-rose-950/30 p-3 text-xs text-rose-400">
           <AlertCircle className="h-4 w-4 shrink-0" />
-          <span>{errorMsg}</span>
+          <span>{state.error}</span>
         </div>
       )}
 
       <button
         type="submit"
-        disabled={loading || !passkey.trim()}
+        disabled={isPending}
         className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-indigo-500 disabled:opacity-50"
       >
-        {loading ? (
+        {isPending ? (
           <Loader2 className="h-4 w-4 animate-spin" />
         ) : (
           <>
