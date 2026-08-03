@@ -1,7 +1,6 @@
 'use server'
 
 import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
 
 export async function verifyPasskey(formData: FormData) {
   const inputPasskey = formData.get('passkey') as string
@@ -10,7 +9,6 @@ export async function verifyPasskey(formData: FormData) {
   if (inputPasskey === secretPasskey) {
     const cookieStore = await cookies()
 
-    // Set cookie with explicit root path and production flags
     cookieStore.set('passkey_auth', 'true', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -19,9 +17,9 @@ export async function verifyPasskey(formData: FormData) {
       maxAge: 60 * 60 * 24 * 7, // 1 week
     })
 
-    redirect('/dashboard')
+    return { success: true }
   } else {
-    redirect('/login?error=Invalid%20passkey')
+    return { success: false, error: 'Invalid passkey' }
   }
 }
 
@@ -34,5 +32,5 @@ export async function checkPasskeyAuth() {
 export async function logout() {
   const cookieStore = await cookies()
   cookieStore.delete('passkey_auth')
-  redirect('/login')
+  return { success: true }
 }

@@ -5,15 +5,31 @@ import { useSearchParams } from 'next/navigation'
 import { KeyRound, ArrowRight, AlertCircle, Loader2 } from 'lucide-react'
 import { verifyPasskey } from './actions'
 
-// 1. Separate component that reads search params
 function LoginForm() {
   const searchParams = useSearchParams()
-  const errorParam = searchParams.get('error')
   const [passkey, setPasskey] = useState('')
   const [loading, setLoading] = useState(false)
+  const [errorMsg, setErrorMsg] = useState(searchParams.get('error') || '')
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setLoading(true)
+    setErrorMsg('')
+
+    const formData = new FormData(e.currentTarget)
+    const result = await verifyPasskey(formData)
+
+    if (result.success) {
+      // Force full reload so cookie is attached to HTTP request
+      window.location.href = '/dashboard'
+    } else {
+      setErrorMsg(result.error || 'Invalid passkey')
+      setLoading(false)
+    }
+  }
 
   return (
-    <form action={verifyPasskey} onSubmit={() => setLoading(true)} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <input
           type="password"
@@ -25,11 +41,10 @@ function LoginForm() {
         />
       </div>
 
-      {/* Reads error from URL query string if passkey fails */}
-      {errorParam && (
+      {errorMsg && (
         <div className="flex items-center gap-2 rounded-lg border border-rose-900/50 bg-rose-950/30 p-3 text-xs text-rose-400">
           <AlertCircle className="h-4 w-4 shrink-0" />
-          <span>{errorParam}</span>
+          <span>{errorMsg}</span>
         </div>
       )}
 
@@ -51,7 +66,6 @@ function LoginForm() {
   )
 }
 
-// 2. Main Page exporting the component wrapped in Suspense
 export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-950 p-4 text-slate-100">
@@ -66,7 +80,6 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Suspense boundary satisfies Next.js static build requirements */}
         <Suspense fallback={
           <div className="flex items-center justify-center py-6 text-slate-500">
             <Loader2 className="h-5 w-5 animate-spin" />
