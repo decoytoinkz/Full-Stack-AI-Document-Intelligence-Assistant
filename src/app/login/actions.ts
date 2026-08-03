@@ -2,6 +2,7 @@
 
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { revalidatePath } from 'next/cache'
 
 export async function verifyPasskey(prevState: any, formData: FormData) {
   const inputPasskey = (formData.get('passkey') as string || '').trim()
@@ -18,7 +19,8 @@ export async function verifyPasskey(prevState: any, formData: FormData) {
       maxAge: 60 * 60 * 24 * 7, // 1 week
     })
 
-    // Direct server-side redirect guarantees cookie headers are sent in response
+    // Force Next.js to purge cached routes on Vercel so /dashboard picks up the new cookie!
+    revalidatePath('/', 'layout')
     redirect('/dashboard')
   }
 
@@ -34,5 +36,6 @@ export async function checkPasskeyAuth() {
 export async function logout() {
   const cookieStore = await cookies()
   cookieStore.delete('passkey_auth')
+  revalidatePath('/', 'layout')
   redirect('/login')
 }
