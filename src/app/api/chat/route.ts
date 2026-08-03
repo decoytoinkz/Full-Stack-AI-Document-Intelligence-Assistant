@@ -30,7 +30,7 @@ export async function POST(request: Request) {
     const base64Data = buffer.toString('base64')
 
     // Select Gemini model
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+    const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' })
 
     // Generate content using multimodal inline data
     const result = await model.generateContent([
