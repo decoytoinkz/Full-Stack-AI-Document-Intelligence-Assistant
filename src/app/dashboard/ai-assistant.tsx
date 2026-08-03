@@ -39,7 +39,7 @@ export default function AiAssistant() {
       formData.append('file', file)
       formData.append('question', question)
 
-      const res = await fetch('/dashboard', {
+      const res = await fetch('/api/chat', {
         method: 'POST',
         body: formData,
       })
