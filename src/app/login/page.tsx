@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { checkPasskeyAuth } from '../login/actions'
-import AiAssistant from './ai-assistant' // or your main component
+
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -29,5 +29,5 @@ export default function DashboardPage() {
     )
   }
 
-  return <AiAssistant />
+ 
 }
